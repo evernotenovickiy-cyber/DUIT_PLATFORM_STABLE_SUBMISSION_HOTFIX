@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}Новая публикация — DUIT{% endblock %}
+{% block content %}
+<section class="section container"><div class="form-card form-card--wide"><a class="back-link" href="{% url 'journal:index' %}">← Назад</a><p class="hero__eyebrow">ЖУРНАЛ DUIT</p><h1>Новая публикация</h1><p class="form-subtitle">Поделитесь полезным опытом, локальной историей или советом.</p><form method="post">{% csrf_token %}{{ form.as_p }}<button class="btn btn-primary">Опубликовать</button></form></div></section>
+{% endblock %}

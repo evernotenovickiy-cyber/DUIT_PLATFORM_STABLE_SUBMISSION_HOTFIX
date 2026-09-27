@@ -1,0 +1,10 @@
+<svg width="140" height="40" viewBox="0 0 140 40" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Duit">
+  <g>
+    <path d="M4 6 C4 4.3 5.3 3 7 3 H18 C27.4 3 35 10.6 35 20 C35 29.4 27.4 37 18 37 H7 C5.3 37 4 35.7 4 34 V6 Z"
+          fill="#3B4FD9"/>
+    <path d="M14 12 C14 10.9 14.9 10 16 10 H19 C25.6 10 31 15.4 31 22 C31 26.4 27.4 30 23 30 H16 C14.9 30 14 29.1 14 28 V12 Z"
+          fill="#FAF6EE"/>
+    <circle cx="30" cy="11" r="4.5" fill="#F2A93B"/>
+  </g>
+  <text x="46" y="27" font-family="'Fraunces', 'Georgia', serif" font-weight="600" font-size="22" fill="#1E2233">Duit</text>
+</svg>

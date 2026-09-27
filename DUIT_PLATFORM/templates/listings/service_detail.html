@@ -1,0 +1,50 @@
+{% extends "base.html" %}{% load humanize %}
+{% block title %}{{ service.title }} — DUIT{% endblock %}
+{% block content %}
+<section class="service-premium container">
+  <a class="service-back" href="{% url 'listings:catalog' %}{% if service.category %}?category={{ service.category.slug }}{% endif %}">← Назад к каталогу</a>
+  <nav class="breadcrumbs"><a href="{% url 'listings:home' %}">DUIT</a><span>›</span><a href="{% url 'listings:catalog' %}">Каталог</a>{% if service.category %}<span>›</span><a href="{% url 'listings:catalog' %}?category={{ service.category.slug }}">{{ service.category.name }}</a>{% endif %}</nav>
+
+  <div class="service-gallery-premium {% if not service.photos.all %}is-single{% endif %}">
+    {% if service.photos.all %}{% for photo in service.photos.all|slice:":5" %}<img class="gallery-cell gallery-cell--{{ forloop.counter }}" src="{{ photo.image.url }}" alt="{{ service.title }}">{% endfor %}
+    {% elif service.demo_image_url %}<img class="gallery-cell gallery-cell--1" src="{{ service.demo_image_url }}" onerror="this.src='{{ service.fallback_image_url }}'" alt="{{ service.title }}">{% endif %}
+  </div>
+
+  <div class="service-premium-grid">
+    <main>
+      <div class="service-title-row"><div>{% if service.category %}<a class="service-kicker" href="{% url 'listings:catalog' %}?category={{ service.category.slug }}">{{ service.category.name }}</a>{% endif %}<h1>{{ service.title }}</h1><div class="service-title-meta">{% if service.average_rating %}<b>★ {{ service.average_rating }}</b> · <a href="#reviews">{{ service.reviews_count }} отзывов</a> · {% endif %}{{ service.city|default:"Онлайн" }} · {{ service.completed_orders }} заказов</div></div></div>
+
+      <div class="service-facts-row">
+        <div><small>Формат</small><b>{{ service.get_service_format_display }}</b></div>
+        <div><small>Длительность</small><b>≈ {{ service.duration_minutes }} мин</b></div>
+        <div><small>Ближайшее время</small><b>{{ service.lead_time }}</b></div>
+      </div>
+
+      <section class="content-block"><h2>Об услуге</h2><div class="rich-copy">{{ service.description|linebreaks }}</div></section>
+      {% if service.included %}<section class="content-block content-block--tint"><h2>Что входит в стоимость</h2><p>{{ service.included }}</p></section>{% endif %}
+      {% if service.process %}<section class="content-block"><h2>Как всё проходит</h2><p>{{ service.process }}</p></section>{% endif %}
+
+      <section class="provider-inline-premium">
+        <div class="provider-inline-premium__avatar">{% if service.provider.profile.avatar_url %}<img src="{{ service.provider.profile.avatar_url }}" onerror="this.src='{{ service.provider.profile.fallback_avatar_url }}'" alt="">{% else %}<span>{{ service.provider.username|first|upper }}</span>{% endif %}</div>
+        <div class="provider-inline-premium__main"><small>Исполнитель</small><h3>{{ service.provider.get_full_name|default:service.provider.username }} {% if service.provider.profile.identity_verified %}<i class="verified-badge">✓</i>{% endif %}</h3><p>{{ service.provider.profile.headline|default:"Специалист DUIT" }}</p><div class="trust-chips">{% if service.provider.profile.identity_verified %}<span>Личность подтверждена</span>{% endif %}{% if service.provider.profile.phone_verified %}<span>Телефон подтверждён</span>{% endif %}<span>{{ service.provider.profile.completed_orders }} выполнено</span><span>Ответ ≈ {{ service.provider.profile.response_time_minutes }} мин</span></div></div>
+        <a class="btn btn-ghost" href="{% url 'listings:provider_detail' service.provider.username %}">Открыть профиль</a>
+      </section>
+
+      <section class="content-block" id="reviews"><div class="section__head"><div><h2>Отзывы</h2>{% if service.average_rating %}<p class="review-summary"><b>★ {{ service.average_rating }}</b> · {{ service.reviews_count }} оценок</p>{% endif %}</div></div>
+        <div class="review-wall review-wall--detail">{% for review in service.reviews.all %}<article class="review-card"><div class="review-card__top"><b>{{ review.author.get_full_name|default:review.author.username }}</b><span>★ {{ review.rating }}</span></div><p>{{ review.text }}</p><small>{{ review.created_at|date:"d.m.Y" }}</small></article>{% empty %}<p class="helptext">Пока нет отзывов.</p>{% endfor %}</div>
+        {% if review_form %}<form method="post" class="review-form-premium">{% csrf_token %}<h3>Оставить отзыв</h3><p class="helptext">Отзыв доступен после завершённого заказа — так рейтинг остаётся привязанным к реальному опыту.</p>{{ review_form.as_p }}<button class="btn btn-primary">Опубликовать</button></form>{% elif review_notice and user.is_authenticated and user != service.provider %}<div class="review-locked"><b>Отзывы подтверждаются заказом</b><p>{{ review_notice }}</p></div>{% endif %}
+      </section>
+    </main>
+
+    <aside class="booking-aside"><div class="booking-card">
+      <div class="booking-price"><small>{{ service.get_pricing_type_display }}</small><strong>{% if service.pricing_type == 'from' %}от {% endif %}{{ service.price|floatformat:0|intcomma }} ₽{% if service.pricing_type == 'hour' %}/ч{% endif %}</strong></div>
+      <div class="booking-availability"><span class="status-dot"></span>{{ service.availability_note }}</div>
+      {% if is_owner %}<a class="btn btn-primary btn-block" href="{% url 'listings:service_edit' service.slug %}">Редактировать услугу</a>
+      {% elif user.is_authenticated %}<a class="btn btn-primary btn-block" href="{% url 'marketplace:order_create' service.id %}">Выбрать дату и заказать</a><form method="post" action="{% url 'marketplace:conversation_start' service.id %}">{% csrf_token %}<button class="btn btn-ghost btn-block">Написать специалисту</button></form><form method="post" action="{% url 'marketplace:favorite_toggle' service.id %}" data-favorite-form>{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}"><button class="btn btn-ghost btn-block favorite-detail {% if is_favorite %}is-active{% endif %}">{% if is_favorite %}♥ В избранном{% else %}♡ Сохранить{% endif %}</button></form>
+      {% else %}<a class="btn btn-primary btn-block" href="{% url 'accounts:login' %}?next={{ request.path }}">Войти и заказать</a><a class="btn btn-ghost btn-block" href="{% url 'accounts:register' %}?role=customer">Создать аккаунт</a>{% endif %}
+      <div class="booking-safe"><b>Заказ внутри DUIT</b><p>Переписка, договорённости и статус заказа сохраняются в личном кабинете.</p></div>
+    </div></aside>
+  </div>
+</section>
+{% if similar %}<section class="market-section market-section--soft"><div class="container"><div class="premium-section-head"><div><span>ЕЩЁ В ЭТОМ НАПРАВЛЕНИИ</span><h2>Похожие услуги</h2></div>{% if service.category %}<a href="{% url 'listings:catalog' %}?category={{ service.category.slug }}">Смотреть все →</a>{% endif %}</div><div class="market-grid market-grid--3">{% for item in similar %}{% include "listings/_service_card.html" with service=item %}{% endfor %}</div></div></section>{% endif %}
+{% endblock %}

@@ -1,0 +1,32 @@
+# Виртуальное окружение
+venv/
+env/
+.venv/
+
+# Переменные окружения
+.env
+
+# База данных
+db.sqlite3
+db.sqlite3-journal
+
+# Медиафайлы, загруженные пользователями
+media/
+
+# Собранная статика
+staticfiles/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# ОС
+.DS_Store
+Thumbs.db

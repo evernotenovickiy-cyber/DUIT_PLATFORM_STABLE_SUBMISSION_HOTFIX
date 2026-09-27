@@ -1,0 +1,10 @@
+DUIT - WINDOWS START
+
+1. Open this folder in VS Code.
+2. Open Terminal -> New Terminal.
+3. First run:   .\verify_windows.bat
+4. If verification passes: .\start_windows.bat
+5. Open: http://127.0.0.1:8000/
+
+The launcher creates .venv automatically and installs requirements.
+Do not run manage.py with the system Python before dependencies are installed.

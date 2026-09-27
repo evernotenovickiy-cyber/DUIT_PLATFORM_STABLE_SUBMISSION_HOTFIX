@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}Страница не найдена — DUIT{% endblock %}
+{% block content %}<section class="section container"><div class="empty-state"><div class="empty-state__icon">404</div><h1>Такой страницы нет</h1><p>Возможно, ссылка устарела или адрес был введён с ошибкой.</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn btn-primary" href="{% url 'listings:home' %}">На главную</a><a class="btn btn-ghost" href="{% url 'listings:catalog' %}">Открыть каталог</a></div></div></section>{% endblock %}

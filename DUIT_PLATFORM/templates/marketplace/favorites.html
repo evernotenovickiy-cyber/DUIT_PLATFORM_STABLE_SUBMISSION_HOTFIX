@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Избранное — DUIT{% endblock %}
+{% block content %}
+<section class="section container">
+  <div class="section__head">
+    <div><p class="hero__eyebrow">СОХРАНЕНО</p><h2>Избранное</h2></div>
+    <a class="btn btn-ghost btn-sm" href="{% url 'listings:catalog' %}">В каталог</a>
+  </div>
+  {% if items %}
+    <div class="card-grid">
+      {% for item in items %}
+        {% include "listings/_service_card.html" with service=item.service %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <p>Здесь будут услуги, к которым хочется вернуться.</p>
+      <a class="btn btn-primary" href="{% url 'listings:catalog' %}">Найти услугу</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

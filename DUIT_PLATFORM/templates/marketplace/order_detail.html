@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Заказ #{{ order.id }} — DUIT{% endblock %}
+{% block content %}
+<section class="section container">
+  <div class="section__head">
+    <div>
+      <p class="hero__eyebrow">ЗАКАЗ #{{ order.id }}</p>
+      <h2>{{ order.service.title }}</h2>
+    </div>
+    <span class="order-status order-status--{{ order.status }}">{{ order.get_status_display }}</span>
+  </div>
+  <div class="detail-grid">
+    <div class="sidebar-card">
+      <div class="order-timeline">
+        <div><span>Заказчик</span><strong>{{ order.customer.username }}</strong></div>
+        <div><span>Исполнитель</span><strong>{{ order.provider.username }}</strong></div>
+        <div><span>Создан</span><strong>{{ order.created_at|date:"d.m.Y H:i" }}</strong></div>
+        <div><span>Цена</span><strong>{{ order.price|floatformat:0|intcomma }} ₽</strong></div>
+        <div><span>Оплата</span><strong class="payment-status payment-status--{{ payment.status }}">{{ payment.get_status_display }}</strong></div>
+      </div>
+      {% if order.note %}
+        <h3 style="margin-top:24px;">Комментарий</h3>
+        <p>{{ order.note|linebreaksbr }}</p>
+      {% endif %}
+      <div class="order-actions">
+        {% if user == order.provider %}
+          {% if order.status == 'new' %}
+            <form method="post" action="{% url 'marketplace:order_status' order.id 'accepted' %}">{% csrf_token %}<button class="btn btn-primary" type="submit">Принять заказ</button></form>
+          {% elif order.status == 'accepted' %}
+            <form method="post" action="{% url 'marketplace:order_status' order.id 'in_progress' %}">{% csrf_token %}<button class="btn btn-primary" type="submit">Начать работу</button></form>
+          {% elif order.status == 'in_progress' %}
+            <form method="post" action="{% url 'marketplace:order_status' order.id 'completed' %}">{% csrf_token %}<button class="btn btn-primary" type="submit">Завершить</button></form>
+          {% endif %}
+          {% if order.status != 'completed' and order.status != 'cancelled' %}
+            <form method="post" action="{% url 'marketplace:order_status' order.id 'cancelled' %}" data-confirm="Отменить заказ?">{% csrf_token %}<button class="btn btn-danger" type="submit">Отменить</button></form>
+          {% endif %}
+        {% else %}
+          {% if order.status == 'new' or order.status == 'accepted' %}
+            <form method="post" action="{% url 'marketplace:order_status' order.id 'cancelled' %}" data-confirm="Отменить заказ?">{% csrf_token %}<button class="btn btn-danger" type="submit">Отменить заказ</button></form>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+    <aside>
+      <div class="sidebar-card payment-order-card">
+        <h3>Оплата</h3>
+        <div class="payment-order-status"><span class="payment-status payment-status--{{ payment.status }}">{{ payment.get_status_display }}</span><strong>{{ payment.amount|floatformat:0|intcomma }} ₽</strong></div>
+        {% if payment.status == 'paid' %}<p class="helptext">Оплачено учебной картой •••• {{ payment.card_last4 }}.<br>{{ payment.transaction_id }}</p>
+        {% elif payment.status == 'refunded' %}<p class="helptext">Учебная операция возвращена после отмены заказа.</p>
+        {% elif user == order.customer %}<p class="helptext">Можно оплатить тестовой картой или выбрать оплату после выполнения.</p><a class="btn btn-primary btn-block" href="{% url 'marketplace:payment_checkout' order.id %}">{% if payment.status == 'failed' %}Повторить оплату{% else %}Выбрать способ оплаты{% endif %}</a>
+        {% else %}<p class="helptext">Заказчик ещё не завершил оплату.</p>{% endif %}
+      </div>
+      <div class="sidebar-card">
+        <h3>Связаться</h3>
+        <p class="helptext">Все договорённости можно вести внутри DUIT.</p>
+        <a class="btn btn-ghost btn-block" href="{% url 'marketplace:conversation' conversation.id %}">Открыть сообщения</a>
+        <a class="btn btn-ghost btn-block" style="margin-top:10px;" href="{{ order.service.get_absolute_url }}">Карточка услуги</a>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

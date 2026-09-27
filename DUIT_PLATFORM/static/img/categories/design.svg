@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7b4d88"/><stop offset="1" stop-color="#c8a4d6"/></linearGradient><filter id="s"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-opacity=".2"/></filter></defs>
+<rect width="1200" height="760" fill="url(#g)"/><circle cx="1020" cy="110" r="260" fill="#fff" opacity=".12"/><circle cx="160" cy="720" r="350" fill="#0a1020" opacity=".14"/>
+<g filter="url(#s)"><rect x="735" y="120" width="330" height="330" rx="70" fill="#fff" opacity=".94"/><text x="900" y="335" text-anchor="middle" font-family="Segoe UI Emoji,Apple Color Emoji,Noto Color Emoji,sans-serif" font-size="145">🎨</text></g>
+<text x="78" y="500" fill="#fff" font-family="Georgia,serif" font-size="72" font-weight="700">Дизайн и творчество</text><text x="82" y="558" fill="#fff" opacity=".86" font-family="Arial,sans-serif" font-size="28">Графический дизайн · UI/UX дизайн · Дизайн интерьера</text><text x="82" y="655" fill="#fff" opacity=".66" font-family="Arial,sans-serif" font-size="22" letter-spacing="6">DUIT COLLECTION</text>
+</svg>

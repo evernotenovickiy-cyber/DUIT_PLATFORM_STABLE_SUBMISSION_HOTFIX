@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: duit
+      POSTGRES_USER: duit
+      POSTGRES_PASSWORD: duit_local_password
+    volumes:
+      - duit_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U duit -d duit"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - duit_internal
+
+  web:
+    build: .
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: duit
+      POSTGRES_USER: duit
+      POSTGRES_PASSWORD: duit_local_password
+      DJANGO_DEBUG: "True"
+      DJANGO_ALLOWED_HOSTS: "127.0.0.1,localhost,0.0.0.0"
+    ports:
+      - "8000:8000"
+    volumes:
+      - duit_media:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - duit_public
+      - duit_internal
+
+volumes:
+  duit_db_data:
+  duit_media:
+
+networks:
+  duit_public:
+  duit_internal:
+    internal: true

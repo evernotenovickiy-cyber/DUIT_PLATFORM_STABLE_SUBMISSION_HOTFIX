@@ -1,0 +1,38 @@
+{% load static %}
+<header class="navbar premium-nav">
+  <div class="container navbar__inner premium-nav__inner">
+    <a class="navbar__logo premium-brand" href="{% url 'listings:home' %}" aria-label="DUIT — на главную"><img src="{% static 'img/logo.svg' %}" alt="DUIT"></a>
+    <a class="nav-location" href="{% url 'listings:catalog' %}"><span class="nav-location__dot"></span> 4 города</a>
+    <form class="nav-search" action="{% url 'listings:catalog' %}" method="get"><span class="nav-search__icon">⌕</span><input name="q" placeholder="Услуга, специалист или задача"><button type="submit">Найти</button></form>
+    <nav class="navbar__links premium-nav__links">
+      <a href="{% url 'listings:catalog' %}">Каталог</a>
+      <a href="{% url 'journal:index' %}">Журнал</a>
+      {% if user.is_authenticated %}<a href="{% url 'marketplace:favorites' %}" aria-label="Избранное">♡{% if nav_favorites_count %}<span class="nav-counter">{{ nav_favorites_count }}</span>{% endif %}</a><a href="{% url 'marketplace:inbox' %}">Сообщения{% if nav_unread_count %}<span class="nav-counter nav-counter--alert">{{ nav_unread_count }}</span>{% endif %}</a>{% endif %}
+    </nav>
+    <div class="navbar__actions">
+      <a class="btn btn-primary btn-sm nav-place" href="{% if user.is_authenticated %}{% url 'listings:service_create' %}{% else %}{% url 'accounts:register' %}?role=provider{% endif %}">+ Разместить услугу</a>
+      {% if user.is_authenticated %}
+      <details class="nav-user-menu"><summary>{% if user.profile.avatar_url %}<img src="{{ user.profile.avatar_url }}" onerror="this.src='{{ user.profile.fallback_avatar_url }}'" alt="">{% else %}<span>{{ user.username|first|upper }}</span>{% endif %}<b>{{ user.first_name|default:user.username }}</b><i>⌄</i></summary><div class="nav-user-menu__panel"><a href="{% url 'accounts:dashboard' %}">Личный кабинет</a><a href="{% url 'accounts:profile_edit' %}">Профиль и роль</a><a href="{% url 'marketplace:inbox' %}">Сообщения</a><form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button type="submit">Выйти</button></form></div></details>
+      {% else %}<a class="nav-login" href="{% url 'accounts:login' %}">Войти</a><a class="btn btn-ghost btn-sm" href="{% url 'accounts:register' %}">Регистрация</a>{% endif %}
+      <button class="navbar__toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <div class="mobile-menu__inner container">
+    <a href="{% url 'listings:catalog' %}">Каталог <span>→</span></a>
+    <a href="{% url 'journal:index' %}">Журнал DUIT <span>→</span></a>
+    <a href="{% url 'listings:catalog' %}">Города <span>→</span></a>
+    {% if user.is_authenticated %}
+      <a href="{% url 'accounts:dashboard' %}">Личный кабинет <span>→</span></a>
+      <a href="{% url 'marketplace:favorites' %}">Избранное {% if nav_favorites_count %}<b>{{ nav_favorites_count }}</b>{% endif %}<span>→</span></a>
+      <a href="{% url 'marketplace:inbox' %}">Сообщения {% if nav_unread_count %}<b>{{ nav_unread_count }}</b>{% endif %}<span>→</span></a>
+      <a class="mobile-menu__primary" href="{% url 'listings:service_create' %}">+ Разместить услугу</a>
+      <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button type="submit">Выйти</button></form>
+    {% else %}
+      <a class="mobile-menu__primary" href="{% url 'accounts:register' %}?role=provider">+ Разместить услугу</a>
+      <div class="mobile-menu__auth"><a href="{% url 'accounts:login' %}">Войти</a><a href="{% url 'accounts:register' %}">Регистрация</a></div>
+    {% endif %}
+  </div>
+</div>
+<form class="mobile-search-bar" action="{% url 'listings:catalog' %}" method="get"><input name="q" placeholder="Что нужно сделать?"><button>Найти</button></form>

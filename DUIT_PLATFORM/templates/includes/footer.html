@@ -1,0 +1,16 @@
+<footer class="footer footer--expanded">
+  <div class="container footer__grid">
+    <div class="footer__brand">
+      <strong>DUIT.</strong>
+      <span>Найди того, кто сделает.</span>
+    </div>
+    <div class="footer__links">
+      <a href="{% url 'listings:catalog' %}">Каталог</a>
+      <a href="{% url 'listings:catalog' %}?group=beauty">Красота</a>
+      <a href="{% url 'listings:catalog' %}?group=home">Дом</a>
+      <a href="{% url 'listings:catalog' %}?group=pets">Животные</a>
+      <a href="{% url 'listings:catalog' %}?group=digital">Digital</a>
+    </div>
+    <div class="footer__meta">© {% now "Y" %} DUIT · учебный итоговый проект</div>
+  </div>
+</footer>

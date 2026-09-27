@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}Что-то пошло не так — DUIT{% endblock %}
+{% block content %}<section class="section container"><div class="empty-state"><div class="empty-state__icon">!</div><h1>Не удалось открыть страницу</h1><p>Попробуйте ещё раз. Если ошибка повторится, вернитесь на главную.</p><a class="btn btn-primary" href="{% url 'listings:home' %}">На главную</a></div></section>{% endblock %}

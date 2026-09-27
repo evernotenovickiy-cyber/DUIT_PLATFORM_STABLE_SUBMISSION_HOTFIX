@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Каталог услуг — DUIT{% endblock %}
+
+{% block content %}
+<section class="catalog-hero catalog-hero--premium">
+  <div class="container">
+    <p class="hero__eyebrow">КАТАЛОГ DUIT</p>
+    <h1>{% if active_group %}{{ active_group.title }}{% elif active_category %}{{ active_category.name }}{% else %}Все услуги{% endif %}</h1>
+    <form class="search-bar catalog-search" method="get">
+      <input type="text" name="q" value="{{ query }}" placeholder="Что нужно сделать?">
+      {% if active_group_slug %}<input type="hidden" name="group" value="{{ active_group_slug }}">{% endif %}
+      {% if active_category %}<input type="hidden" name="category" value="{{ active_category.slug }}">{% endif %}
+      <button type="submit" class="btn btn-primary btn-sm">Найти</button>
+    </form>
+  </div>
+</section>
+
+<section class="section container catalog-layout">
+  <aside class="catalog-sidebar">
+    <form method="get" class="filter-panel" id="catalog-filter-form">
+      <div class="filter-panel__title">Фильтры</div>
+      <div class="field">
+        <label for="group">Сфера</label>
+        <select id="group" name="group" data-auto-submit>
+          <option value="">Все сферы</option>
+          {% for group in category_groups %}
+            <option value="{{ group.slug }}" {% if active_group_slug == group.slug %}selected{% endif %}>{{ group.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="category">Направление</label>
+        <select id="category" name="category">
+          <option value="">Все направления</option>
+          {% if active_group %}
+            {% for category in active_group.items %}
+              <option value="{{ category.slug }}" {% if active_category.id == category.id %}selected{% endif %}>{{ category.icon }} {{ category.name }}</option>
+            {% endfor %}
+          {% else %}
+            {% for group in category_groups %}
+              <optgroup label="{{ group.title }}">
+                {% for category in group.items %}
+                  <option value="{{ category.slug }}" {% if active_category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+              </optgroup>
+            {% endfor %}
+          {% endif %}
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="city">Город</label>
+        <select id="city" name="city">
+          <option value="">Любой</option>
+          {% for item in cities %}<option value="{{ item }}" {% if city == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-price-grid">
+        <div class="field"><label for="min_price">Цена от</label><input id="min_price" type="number" min="0" name="min_price" value="{{ min_price }}" placeholder="0"></div>
+        <div class="field"><label for="max_price">до</label><input id="max_price" type="number" min="0" name="max_price" value="{{ max_price }}" placeholder="100000"></div>
+      </div>
+
+      <div class="field">
+        <label for="format">Формат</label>
+        <select id="format" name="format">
+          <option value="">Любой</option><option value="provider" {% if service_format == 'provider' %}selected{% endif %}>У специалиста</option><option value="visit" {% if service_format == 'visit' %}selected{% endif %}>С выездом</option><option value="online" {% if service_format == 'online' %}selected{% endif %}>Онлайн</option><option value="flexible" {% if service_format == 'flexible' %}selected{% endif %}>По договорённости</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="rating">Рейтинг от</label>
+        <select id="rating" name="rating"><option value="">Любой</option><option value="4.5" {% if min_rating == '4.5' %}selected{% endif %}>★ 4.5+</option><option value="4.7" {% if min_rating == '4.7' %}selected{% endif %}>★ 4.7+</option><option value="4.9" {% if min_rating == '4.9' %}selected{% endif %}>★ 4.9+</option></select>
+      </div>
+
+      <div class="field">
+        <label for="sort">Сортировка</label>
+        <select id="sort" name="sort">
+          <option value="new" {% if sort == 'new' %}selected{% endif %}>Сначала новые</option>
+          <option value="rating" {% if sort == 'rating' %}selected{% endif %}>По рейтингу</option>
+          <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Сначала дешевле</option>
+          <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Сначала дороже</option>
+        </select>
+      </div>
+
+      {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+      <button class="btn btn-primary btn-block" type="submit">Показать</button>
+      <a class="filter-reset" href="{% url 'listings:catalog' %}">Сбросить фильтры</a>
+    </form>
+  </aside>
+
+  <div class="catalog-main">
+    <div class="catalog-groups-strip" aria-label="Сферы услуг">
+      <a href="{% url 'listings:catalog' %}" class="catalog-group-pill {% if not active_group_slug %}is-active{% endif %}">Все</a>
+      {% for group in category_groups %}
+        <a href="{% url 'listings:catalog' %}?group={{ group.slug }}" class="catalog-group-pill {% if active_group_slug == group.slug %}is-active{% endif %}">{{ group.title }}</a>
+      {% endfor %}
+    </div>
+
+    {% if active_group_categories %}
+      <div class="subcategory-grid" data-reveal>
+        {% for category in active_group_categories %}
+          <a class="subcategory-card {% if active_category.id == category.id %}is-active{% endif %}" href="?group={{ active_group_slug }}&category={{ category.slug }}{% if query %}&q={{ query|urlencode }}{% endif %}">
+            <span class="subcategory-card__dot"></span><b>{{ category.name }}</b>{% if category.active_count %}<small>{{ category.active_count }}</small>{% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="active-filter-chips">{% if city %}<span>{{ city }}</span>{% endif %}{% if service_format %}<span>{{ service_format }}</span>{% endif %}{% if min_rating %}<span>★ {{ min_rating }}+</span>{% endif %}{% if min_price %}<span>от {{ min_price }} ₽</span>{% endif %}{% if max_price %}<span>до {{ max_price }} ₽</span>{% endif %}</div>
+
+    <div class="catalog-result-head">
+      <div>
+        <h2>{% if query %}По запросу «{{ query }}»{% else %}Услуги{% endif %}</h2>
+        <span>{{ page_obj.paginator.count }} найдено</span>
+      </div>
+      {% if active_category %}<a class="chip is-active" href="?group={{ active_group_slug }}">{{ active_category.name }} ×</a>{% endif %}
+    </div>
+
+    {% if page_obj.object_list %}
+      <div class="market-grid market-grid--3">
+        {% for service in page_obj %}{% include "listings/_service_card.html" with service=service %}{% endfor %}
+      </div>
+
+      {% if page_obj.paginator.num_pages > 1 %}
+        <div class="pagination">
+          {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">‹</a>{% endif %}
+          {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}<span class="is-current">{{ num }}</span>{% else %}<a href="?page={{ num }}{% if querystring %}&{{ querystring }}{% endif %}">{{ num }}</a>{% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">›</a>{% endif %}
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="empty-state empty-state--catalog">
+        <div class="empty-state__icon">⌕</div>
+        <h3>Пока ничего</h3>
+        <p>Попробуйте другую категорию, город или диапазон цены.</p>
+        <a class="btn btn-ghost" href="{% url 'listings:catalog' %}">Сбросить фильтры</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

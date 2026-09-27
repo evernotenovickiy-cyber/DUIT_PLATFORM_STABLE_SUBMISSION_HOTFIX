@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Диалог — DUIT{% endblock %}
+{% block content %}
+<section class="section container messenger-shell">
+  <div class="messenger-head">
+    <a href="{% url 'marketplace:inbox' %}">← Все диалоги</a>
+    <div>
+      <h2>{% if user == conversation.customer %}{{ conversation.provider.get_full_name|default:conversation.provider.username }}{% else %}{{ conversation.customer.get_full_name|default:conversation.customer.username }}{% endif %}</h2>
+      {% if conversation.service %}<a href="{{ conversation.service.get_absolute_url }}">{{ conversation.service.title }}</a>{% endif %}
+    </div>
+  </div>
+  <div class="messenger-thread" id="messageThread" data-json-url="{% url 'marketplace:conversation_json' conversation.id %}" data-user-id="{{ user.id }}">
+    {% for message in thread %}
+      <div class="message-bubble {% if message.sender == user %}is-mine{% endif %}">
+        <div>{{ message.text|linebreaksbr }}</div>
+        <span>{{ message.created_at|date:"H:i" }}</span>
+      </div>
+    {% endfor %}
+  </div>
+  <form class="messenger-compose" method="post">
+    {% csrf_token %}
+    {{ form.text }}
+    <button class="btn btn-primary" type="submit">Отправить</button>
+  </form>
+</section>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+(function(){
+  const thread = document.getElementById('messageThread');
+  if (!thread) return;
+  thread.scrollTop = thread.scrollHeight;
+  const url = thread.dataset.jsonUrl;
+  function esc(value){ const d=document.createElement('div'); d.textContent=value; return d.innerHTML; }
+  async function refresh(){
+    try {
+      const response = await fetch(url, {headers:{'X-Requested-With':'XMLHttpRequest'}});
+      if(!response.ok) return;
+      const data = await response.json();
+      const nearBottom = thread.scrollHeight - thread.scrollTop - thread.clientHeight < 120;
+      thread.innerHTML = data.messages.map(m => `<div class="message-bubble ${m.mine?'is-mine':''}"><div>${esc(m.text).replace(/\n/g,'<br>')}</div><span>${m.created_at}</span></div>`).join('');
+      if(nearBottom) thread.scrollTop = thread.scrollHeight;
+    } catch(e) {}
+  }
+  setInterval(refresh, 4000);
+})();
+</script>
+{% endblock %}

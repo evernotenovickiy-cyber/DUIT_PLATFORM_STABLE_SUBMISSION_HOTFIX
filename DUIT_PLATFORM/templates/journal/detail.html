@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} — Журнал DUIT{% endblock %}
+{% block content %}
+<article class="journal-detail container">
+  <a class="back-link" href="{% url 'journal:index' %}">← Назад в журнал</a>
+  <div class="journal-detail__head"><span>{{ post.get_kind_display }}{% if post.city %} · {{ post.city }}{% endif %}</span><h1>{{ post.title }}</h1><p>{{ post.excerpt }}</p><small>{{ post.author.get_full_name|default:post.author.username }} · {{ post.created_at|date:"d.m.Y" }}</small></div>
+  {% if post.image_url %}<div class="journal-detail__cover" style="background-image:url('{{ post.image_url }}')"></div>{% endif %}
+  <div class="journal-detail__body">{{ post.body|linebreaks }}</div>
+</article>
+{% if related %}<section class="market-section market-section--soft"><div class="container"><div class="premium-section-head"><div><span>ЕЩЁ ПО ТЕМЕ</span><h2>Продолжить чтение</h2></div></div><div class="journal-grid journal-grid--3">{% for item in related %}<a class="journal-card" href="{{ item.get_absolute_url }}"><div class="journal-card__image" {% if item.image_url %}style="background-image:url('{{ item.image_url }}')"{% endif %}></div><div class="journal-card__body"><h3>{{ item.title }}</h3><p>{{ item.excerpt }}</p></div></a>{% endfor %}</div></div></section>{% endif %}
+{% endblock %}

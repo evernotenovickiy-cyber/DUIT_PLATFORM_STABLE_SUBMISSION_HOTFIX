@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Журнал DUIT — идеи, советы и локальные истории{% endblock %}
+{% block content %}
+<section class="journal-hero">
+  <div class="container journal-hero__inner">
+    <div><p class="hero__eyebrow">ЖУРНАЛ DUIT</p><h1>Полезное рядом.</h1><p>Советы, локальные истории, идеи для дома, питомцев, красоты, работы и жизни в городе.</p></div>
+    {% if user.is_authenticated %}<a class="btn btn-primary" href="{% url 'journal:create' %}">+ Написать пост</a>{% endif %}
+  </div>
+</section>
+<section class="section container">
+  <form class="journal-filter" method="get">
+    <input name="q" value="{{ query }}" placeholder="Поиск по журналу">
+    <select name="city"><option value="">Все города</option>{% for city in cities %}<option value="{{ city }}" {% if active_city == city %}selected{% endif %}>{{ city }}</option>{% endfor %}</select>
+    <select name="kind"><option value="">Все темы</option>{% for value,label in kinds %}<option value="{{ value }}" {% if active_kind == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+    <button class="btn btn-primary btn-sm">Показать</button>
+  </form>
+  {% if page_obj.object_list %}
+  <div class="journal-grid">
+    {% for post in page_obj %}
+    <a class="journal-card" href="{{ post.get_absolute_url }}">
+      <div class="journal-card__image" {% if post.image_url %}style="background-image:url('{{ post.image_url }}')"{% endif %}><span>{{ post.get_kind_display }}</span></div>
+      <div class="journal-card__body"><div class="journal-card__meta">{% if post.city %}{{ post.city }} · {% endif %}{{ post.created_at|date:"d.m.Y" }}</div><h3>{{ post.title }}</h3><p>{{ post.excerpt }}</p><div class="journal-card__author">{{ post.author.get_full_name|default:post.author.username }}</div></div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}<div class="empty-state"><h3>Публикаций пока нет</h3><p>Измените фильтры или станьте первым автором.</p></div>{% endif %}
+</section>
+{% endblock %}

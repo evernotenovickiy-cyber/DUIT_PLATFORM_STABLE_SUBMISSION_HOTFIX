@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}{% if is_new %}Новая услуга{% else %}Редактирование услуги{% endif %} — DUIT{% endblock %}
+
+{% block content %}
+<section class="section container">
+  <div class="publish-shell">
+    <aside class="publish-intro">
+      <span>DUIT FOR PRO</span>
+      <h1>{% if is_new %}Создайте витрину услуги{% else %}Обновите услугу{% endif %}</h1>
+      <p>Чем точнее карточка, тем проще клиенту принять решение. Покажите результат, объясните формат и сразу обозначьте условия.</p>
+      <div class="publish-tips">
+        <div><b>01</b><span>Конкретный заголовок</span></div>
+        <div><b>02</b><span>Живые фотографии</span></div>
+        <div><b>03</b><span>Цена и формат без сюрпризов</span></div>
+      </div>
+    </aside>
+
+    <div class="form-card form-card--premium">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+
+        <div class="form-section">
+          <span>ОСНОВА</span>
+          <div class="field">
+            <label for="{{ form.title.id_for_label }}">Название услуги</label>
+            {{ form.title }}{{ form.title.errors }}
+          </div>
+          <div class="form-grid-2">
+            <div class="field">
+              <label for="{{ form.category_group.id_for_label }}">Сфера</label>
+              {{ form.category_group }}{{ form.category_group.errors }}
+            </div>
+            <div class="field">
+              <label for="{{ form.category.id_for_label }}">Направление</label>
+              {{ form.category }}{{ form.category.errors }}
+            </div>
+          </div>
+          <p class="helptext">Сначала выберите сферу, затем точное направление.</p>
+          <div class="field">
+            <label for="{{ form.description.id_for_label }}">Описание</label>
+            {{ form.description }}{{ form.description.errors }}
+          </div>
+        </div>
+
+        <div class="form-section">
+          <span>УСЛОВИЯ</span>
+          <div class="form-grid-2">
+            <div class="field"><label>Цена, ₽</label>{{ form.price }}{{ form.price.errors }}</div>
+            <div class="field"><label>Как указана цена</label>{{ form.pricing_type }}{{ form.pricing_type.errors }}</div>
+            <div class="field"><label>Формат</label>{{ form.service_format }}{{ form.service_format.errors }}</div>
+            <div class="field"><label>Город</label>{{ form.city }}{{ form.city.errors }}</div>
+            <div class="field"><label>Длительность, минут</label>{{ form.duration_minutes }}{{ form.duration_minutes.errors }}</div>
+            <div class="field"><label>Ближайшее время</label>{{ form.lead_time }}{{ form.lead_time.errors }}</div>
+          </div>
+          <div class="field"><label>Что входит</label>{{ form.included }}{{ form.included.errors }}</div>
+          <div class="field"><label>Как проходит работа</label>{{ form.process }}{{ form.process.errors }}</div>
+          <div class="field"><label>Статус доступности</label>{{ form.availability_note }}{{ form.availability_note.errors }}</div>
+        </div>
+
+        <div class="form-section">
+          <span>ПОРТФОЛИО</span>
+          <div class="field">
+            <label>{{ photos_form.photos.label }}</label>
+            {{ photos_form.photos }}{{ photos_form.photos.errors }}
+            <p class="helptext" data-photo-count>Лучше 4–6 разных кадров: общий вид, детали, процесс и результат.</p>
+          </div>
+          {% if service and service.photos.all %}
+          <div class="manage-gallery">
+            {% for photo in service.photos.all %}
+            <div class="manage-gallery__item">
+              <img src="{{ photo.image.url }}" alt="Фото услуги">
+              <button type="submit" class="btn btn-danger btn-sm btn-block" form="delete-photo-{{ photo.id }}">Удалить</button>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="field checkbox-row">{{ form.is_active }}<label for="{{ form.is_active.id_for_label }}">Опубликовать сразу</label></div>
+        <button class="btn btn-primary btn-block btn-lg" type="submit">{% if is_new %}Опубликовать услугу{% else %}Сохранить изменения{% endif %}</button>
+      </form>
+
+      {% if service %}
+        {% for photo in service.photos.all %}
+        <form id="delete-photo-{{ photo.id }}" method="post" action="{% url 'listings:service_photo_delete' photo.id %}" style="display:none">{% csrf_token %}</form>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+{{ category_map|json_script:"category-map" }}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var groupField = document.getElementById("id_category_group");
+  var categoryField = document.getElementById("id_category");
+  var dataNode = document.getElementById("category-map");
+  if (!groupField || !categoryField || !dataNode) return;
+
+  var categoryMap = JSON.parse(dataNode.textContent);
+  var originalOptions = Array.from(categoryField.options).map(function (option) {
+    return {value: option.value, text: option.text, selected: option.selected};
+  });
+
+  function rebuildCategories() {
+    var allowed = new Set(categoryMap[groupField.value] || []);
+    var current = categoryField.value;
+    categoryField.innerHTML = "";
+
+    var empty = document.createElement("option");
+    empty.value = "";
+    empty.textContent = "Выберите направление";
+    categoryField.appendChild(empty);
+
+    originalOptions.forEach(function (option) {
+      if (!option.value || !allowed.has(option.text)) return;
+      var element = document.createElement("option");
+      element.value = option.value;
+      element.textContent = option.text;
+      element.selected = option.value === current;
+      categoryField.appendChild(element);
+    });
+  }
+
+  groupField.addEventListener("change", rebuildCategories);
+  rebuildCategories();
+});
+</script>
+{% endblock %}

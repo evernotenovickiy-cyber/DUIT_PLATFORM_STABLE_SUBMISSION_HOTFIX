@@ -1,0 +1,37 @@
+{% load humanize %}
+<article class="market-card market-card--world" data-reveal>
+  <div class="market-card__media-wrap">
+    <a class="market-card__media" href="{{ service.get_absolute_url }}" {% if service.cover_image_url %}style="background-image:url('{{ service.cover_image_url }}'),url('{{ service.fallback_image_url }}')"{% endif %} aria-label="{{ service.title }}">
+      <span class="market-card__shade"></span>
+      {% if service.average_rating %}<span class="market-card__rating">★ {{ service.average_rating }} <small>{{ service.reviews_count }} отзыв.</small></span>{% endif %}
+      <span class="market-card__format">{{ service.get_service_format_display }}</span>
+    </a>
+    {% if user.is_authenticated and user != service.provider %}
+    <form class="favorite-quick" action="{% url 'marketplace:favorite_toggle' service.id %}" method="post" data-favorite-form>
+      {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <button type="submit" class="market-card__heart {% if service.id in favorite_ids %}is-active{% endif %}" aria-label="В избранное">{% if service.id in favorite_ids %}♥{% else %}♡{% endif %}</button>
+    </form>
+    {% else %}<span class="market-card__heart market-card__heart--static">♡</span>{% endif %}
+  </div>
+  <div class="market-card__body">
+    <div class="market-card__provider">
+      <a class="provider-mini" href="{% url 'listings:provider_detail' service.provider.username %}">
+        {% if service.provider.profile.avatar_url %}<img src="{{ service.provider.profile.avatar_url }}" onerror="this.src='{{ service.provider.profile.fallback_avatar_url }}'" alt="">{% else %}<span>{{ service.provider.username|first|upper }}</span>{% endif %}
+      </a>
+      <div class="market-card__provider-copy">
+        <a class="market-card__name" href="{% url 'listings:provider_detail' service.provider.username %}">{{ service.provider.get_full_name|default:service.provider.username }}{% if service.provider.profile.identity_verified %}<i class="verified-badge" title="Личность подтверждена">✓</i>{% endif %}</a>
+        <div class="market-card__place">{{ service.city|default:"Онлайн" }} · {{ service.provider.profile.experience_years }} лет опыта</div>
+      </div>
+    </div>
+    <a href="{{ service.get_absolute_url }}" class="market-card__title">{{ service.title }}</a>
+    {% if service.category %}<div class="market-card__category">{{ service.category.name }}</div>{% endif %}
+    <div class="market-card__signals">
+      <span>{{ service.availability_note|default:service.lead_time }}</span>
+      <span>{{ service.completed_orders }} заказов</span>
+    </div>
+    <div class="market-card__bottom">
+      <strong>{% if service.pricing_type == 'from' %}от {% endif %}{{ service.price|floatformat:0|intcomma }} ₽{% if service.pricing_type == 'hour' %}/ч{% endif %}</strong>
+      <a class="market-card__details-link" href="{{ service.get_absolute_url }}" aria-label="Подробнее об услуге {{ service.title }}">Подробнее →</a>
+    </div>
+  </div>
+</article>

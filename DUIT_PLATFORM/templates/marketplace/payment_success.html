@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% load humanize %}
+{% block title %}Оплата прошла — DUIT{% endblock %}
+{% block content %}
+<section class="section container"><div class="payment-result">
+  <div class="payment-result__icon">✓</div><span class="hero__eyebrow">DUIT PAY · DEMO</span><h1>Оплата прошла</h1>
+  <p>Учебная операция успешно проведена. Реальные денежные средства не списывались.</p>
+  <div class="payment-receipt"><div><span>Заказ</span><b>#{{ order.id }}</b></div><div><span>Сумма</span><b>{{ payment.amount|floatformat:0|intcomma }} ₽</b></div><div><span>Карта</span><b>•••• {{ payment.card_last4 }}</b></div><div><span>Операция</span><b>{{ payment.transaction_id }}</b></div><div><span>Статус</span><b class="payment-status payment-status--paid">Оплачено</b></div></div>
+  <div class="payment-result__actions"><a class="btn btn-primary" href="{% url 'marketplace:order_detail' order.id %}">Перейти к заказу</a><a class="btn btn-ghost" href="{% url 'accounts:dashboard' %}?mode=customer&tab=orders">Мои заказы</a></div>
+</div></section>
+{% endblock %}

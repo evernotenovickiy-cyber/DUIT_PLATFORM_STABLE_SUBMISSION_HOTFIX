@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Сообщения — DUIT{% endblock %}
+{% block content %}
+<section class="section container">
+  <div class="section__head"><div><p class="hero__eyebrow">DUIT MESSAGES</p><h2>Сообщения</h2></div></div>
+  {% if conversations %}
+    <div class="inbox-list">
+      {% for conversation in conversations %}
+        <a class="inbox-row" href="{% url 'marketplace:conversation' conversation.id %}">
+          <div class="inbox-row__avatar">{% if user == conversation.customer %}<img src="{{ conversation.provider.profile.avatar_url }}" onerror="this.src='{{ conversation.provider.profile.fallback_avatar_url }}'" alt="">{% else %}<img src="{{ conversation.customer.profile.avatar_url }}" onerror="this.src='{{ conversation.customer.profile.fallback_avatar_url }}'" alt="">{% endif %}</div>
+          <div class="inbox-row__body">
+            <div class="inbox-row__title">
+              {% if user == conversation.customer %}{{ conversation.provider.get_full_name|default:conversation.provider.username }}{% else %}{{ conversation.customer.get_full_name|default:conversation.customer.username }}{% endif %}
+              {% if conversation.service %}<span>· {{ conversation.service.title }}</span>{% endif %}
+            </div>
+            <div class="inbox-row__preview">
+              {% with last=conversation.messages.last %}{% if last %}{{ last.text|truncatechars:85 }}{% else %}Начните диалог{% endif %}{% endwith %}
+            </div>
+          </div>
+          <div class="inbox-row__time">{{ conversation.updated_at|date:"d.m H:i" }}</div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state"><p>Сообщений пока нет. Откройте услугу и напишите исполнителю.</p><a class="btn btn-primary" href="{% url 'listings:catalog' %}">В каталог</a></div>
+  {% endif %}
+</section>
+{% endblock %}

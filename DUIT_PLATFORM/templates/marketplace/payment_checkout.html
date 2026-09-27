@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% load humanize %}
+{% block title %}Оплата заказа #{{ order.id }} — DUIT{% endblock %}
+{% block content %}
+<section class="section container payment-page">
+  <a class="back-link" href="{% url 'marketplace:order_detail' order.id %}">← К заказу</a>
+  <div class="payment-shell">
+    <div class="payment-main">
+      <span class="hero__eyebrow">УЧЕБНАЯ ОПЛАТА</span>
+      <h1>Оплата заказа #{{ order.id }}</h1>
+      <p class="payment-lead">Это безопасная имитация платёжного шлюза для учебного проекта. Реальные деньги не списываются, реквизиты карты не сохраняются.</p>
+      <div class="demo-pay-notice"><b>Тестовая карта для успешной оплаты</b><code>4242 4242 4242 4242</code><span>Срок: 12/30 · CVV: 123</span><small>Для демонстрации отказа: 4000 0000 0000 0002</small></div>
+      <form method="post" class="payment-form" data-payment-form>{% csrf_token %}
+        <div class="payment-methods">
+          {% for radio in form.method %}<label class="payment-method">{{ radio.tag }}<span><b>{% if radio.data.value == 'card' %}Банковская карта{% else %}После выполнения{% endif %}</b><small>{% if radio.data.value == 'card' %}Мгновенная учебная оплата внутри DUIT{% else %}Согласуйте оплату с исполнителем после работы{% endif %}</small></span></label>{% endfor %}
+        </div>
+        {% if form.method.errors %}<div class="form-errors">{{ form.method.errors }}</div>{% endif %}
+        <div class="card-fields" data-card-fields>
+          <div class="field"><label>{{ form.card_holder.label }}</label>{{ form.card_holder }}{{ form.card_holder.errors }}</div>
+          <div class="field"><label>{{ form.card_number.label }}</label>{{ form.card_number }}{{ form.card_number.errors }}</div>
+          <div class="form-grid-2"><div class="field"><label>{{ form.expiry.label }}</label>{{ form.expiry }}{{ form.expiry.errors }}</div><div class="field"><label>{{ form.cvv.label }}</label>{{ form.cvv }}{{ form.cvv.errors }}</div></div>
+          <div class="payment-security">🔒 DUIT не хранит номер карты и CVV. В БД сохраняются только последние 4 цифры и статус учебной операции.</div>
+        </div>
+        <button class="btn btn-primary btn-lg btn-block" type="submit" data-pay-button>Оплатить {{ order.price|floatformat:0|intcomma }} ₽</button>
+      </form>
+    </div>
+    <aside class="payment-summary">
+      <span>К оплате</span><strong>{{ order.price|floatformat:0|intcomma }} ₽</strong>
+      <div><small>Услуга</small><b>{{ order.service.title }}</b></div>
+      <div><small>Исполнитель</small><b>{{ order.provider.get_full_name|default:order.provider.username }}</b></div>
+      <div><small>Статус заказа</small><b>{{ order.get_status_display }}</b></div>
+      <div class="payment-brand">DUIT PAY <em>DEMO</em></div>
+    </aside>
+  </div>
+</section>
+{% endblock %}
+{% block extra_scripts %}<script>document.addEventListener('DOMContentLoaded',function(){var form=document.querySelector('[data-payment-form]');if(!form)return;var fields=document.querySelector('[data-card-fields]');var button=document.querySelector('[data-pay-button]');function sync(){var checked=form.querySelector('input[name="method"]:checked');var card=!checked||checked.value==='card';fields.hidden=!card;button.textContent=card?'Оплатить {{ order.price|floatformat:0|intcomma }} ₽':'Подтвердить оплату после выполнения';}form.querySelectorAll('input[name="method"]').forEach(function(el){el.addEventListener('change',sync)});sync();});</script>{% endblock %}
